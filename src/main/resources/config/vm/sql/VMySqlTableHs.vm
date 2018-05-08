@@ -1,0 +1,23 @@
+#set($table = $data.getDataName())
+#set($hs = "_hs")
+#set($pkeyType = "")
+#set($pkeyLen = "")
+DROP TABLE IF EXISTS `$table`;
+CREATE TABLE `$table$hs` (
+#foreach($field in $data.getFieldList())
+#if($field.getIsPk() =="Y")
+#set($pkeyType = "$field.getDbDataType()")
+#set($pkeyLen = "$field.getDataLength()")
+   `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) NOT NULL AUTO_INCREMENT COMMENT '$field.getLabel()$field.getNote()',
+#elseif($field.getDbDataType() == "timestamp")
+   `$field.getDataName()` timestamp NULL DEFAULT '0000-00-00 00:00:00' COMMENT '$field.getLabel()',
+#elseif($field.getTypeCd()=="R")
+   `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) #if($field.getIsNull() == "N") NOT NULL #end
+#if($field.getDefaultValue() > 0) DEFAULT '$field.getDefaultValue()' #else DEFAULT NULL #end
+COMMENT '$field.getLabel()$field.getNote()',
+#end
+#end
+   `HISTORY_CD` varchar(2) DEFAULT NULL COMMENT '操作状态',
+   `RECORD_ID` $pkeyType($pkeyLen) NOT NULL COMMENT '原表主键',
+   PRIMARY KEY (`$tableBean.getPkey()`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

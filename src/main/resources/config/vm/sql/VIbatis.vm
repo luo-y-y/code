@@ -1,0 +1,159 @@
+#set($aliasName = $data.getEntityAliasName())
+#set($dao = ${sfx_dao})
+#set($map = "Map")
+#set($column = "$data.getDataName()_sql_col")
+#set($comma = ",")
+#set($hs = "_HS")
+#set($count = $data.getFieldList().size())
+#set($table = $data.getDataName())
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="$data.getPackageName()$dao">
+   <resultMap type="$data.getEntityPackage()" id="$aliasName$map">
+      <id property="id" column="ID" />
+#foreach($field in $data.getFieldList())
+#if($field.getName()!="id")
+      <result property="$field.getName()" column="$field.getDataName()"/>
+#end
+#end
+#if($isHistory == "Y")
+      <result property="historyCd" column="HISTORY_CD" />
+      <result property="recordId" column="RECORD_ID" />
+#end
+   </resultMap>
+	
+   <sql id="$column">
+      #foreach($field in $data.getFieldList())$field.getDataName()#if($!{velocityCount} != $count)$comma #end#end
+
+   </sql>
+
+   <sql id="select_head_sql">
+      SELECT 
+         <include refid="$column" />
+      FROM $table
+   </sql>
+
+   <sql id="select_count_sql">
+      SELECT count(id) FROM $table
+   </sql>
+
+   <!--***********************define begin***********************-->
+#if($data.getDefPropertyContent() == "")
+   <sql id="list_where_sql">
+      where 1=1
+   </sql>
+   <sql id="page_where_sql">
+      where 1=1
+   </sql>
+   <sql id="count_where_sql">
+      where 1=1
+   </sql>
+#if($isHistory == "Y")
+   <sql id="hs_page_where_sql">
+      where 1=1
+         AND RECORD_ID = #{recordId}
+   </sql>
+#end
+#else
+$data.getDefPropertyContent()
+#end
+   <!--***********************define end*************************-->
+   
+   <insert id="insert" parameterType="hashMap">
+      <selectKey resultType="int" order="AFTER" keyProperty="id">
+      <![CDATA[SELECT LAST_INSERT_ID() AS id ]]>
+      </selectKey>
+      INSERT INTO $table (<include refid="$column" />) 
+      VALUES(#foreach($field in $data.getFieldList())#{$field.getName()}#if($!{velocityCount} != $count),#end #end)
+   </insert>
+
+   <insert id="save" parameterType="hashMap">
+      <selectKey resultType="int" order="AFTER" keyProperty="id">
+      <![CDATA[SELECT LAST_INSERT_ID() AS id ]]>
+      </selectKey>
+      INSERT INTO $table (<include refid="$column" />) 
+      VALUES(#foreach($field in $data.getFieldList())#{$field.getName()}#if($!{velocityCount} != $count),#end #end)
+   </insert>
+
+   <delete id="delete" parameterType="hashMap">
+      DELETE from $table WHERE id = #{id}
+   </delete>
+
+   <delete id="deleteByIds" parameterType="hashMap">
+      DELETE from $table WHERE id in
+      <foreach collection="idList" item="ids" open="(" separator="," close=")">
+         #{ids}
+      </foreach>
+   </delete>
+
+   <update id="update" parameterType="hashMap">
+      UPDATE $table SET #foreach($field in $data.getFieldList())#if($field.getName()!="id")$field.getDataName()=#{$field.getName()}#if($!{velocityCount} != $count),#end #end#end
+
+      WHERE id = #{id}
+   </update>
+
+   <select id="load" resultMap="$aliasName$map" parameterType="hashMap">
+      SELECT 
+         <include refid="$column"/>
+      FROM $table
+      WHERE id = #{id}
+   </select>
+   
+   <select id="loadCount" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="count_where_sql" />
+   </select>
+   
+   <select id="findList" resultMap="$aliasName$map" parameterType="hashMap">
+      <include refid="select_head_sql" /> 
+      <include refid="list_where_sql" />
+   </select>
+
+   <select id="findPageList" resultMap="$aliasName$map" parameterType="hashMap">
+      <include refid="select_head_sql" />
+      <include refid="page_where_sql" />
+   </select>
+  
+   <select id="findPageList_get_row_count" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="page_where_sql" />
+   </select>
+
+#if($isHistory == "Y")
+   <sql id="hs_select_head_sql">
+      SELECT 
+         <include refid="$column" />,HISTORY_CD,RECORD_ID
+      FROM ${table}${hs}
+   </sql>
+
+   <sql id="hs_select_count_sql">
+      SELECT count(id) FROM ${table}${hs}
+   </sql>
+
+   <insert id="insertHs" parameterType="hashMap">
+      <selectKey resultType="int" order="AFTER" keyProperty="id">
+      <![CDATA[SELECT LAST_INSERT_ID() AS id ]]>
+      </selectKey>
+      INSERT INTO ${table}${hs} (<include refid="$column" />,HISTORY_CD,RECORD_ID) 
+      VALUES(#foreach($field in $data.getFieldList())#{$field.getName()},#end #{historyCd}, #{recordId})
+   </insert>
+
+   <select id="findPageHsList_get_row_count" resultType="Integer">
+      <include refid="hs_select_count_sql" />
+      <include refid="hs_page_where_sql" />
+   </select>
+
+   <select id="findPageHsList" resultMap="$aliasName$map" parameterType="hashMap">
+      <include refid="hs_select_head_sql" />
+      <include refid="hs_page_where_sql" />
+      ORDER BY UPDATE_DATE DESC
+   </select>
+#end   
+
+   <!--***********************method begin**********************-->
+$data.getDefMethodContent()
+   <!--***********************method end***********************-->
+
+
+</mapper>

@@ -1,0 +1,135 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name = $data.getClassName())
+#set($nameAlias = $data.getClassAliasName())
+#set($entityName = $data.getEntityName())
+#set($entityAliasName = $data.getEntityAliasName())
+/// ***********************import begin***********************
+#if($data.getDefImportContent() == "")
+import java.util.List;
+import java.util.Map;
+
+import org.mobj.com.lang.RLong;
+import org.mobj.com.lang.RDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.tom.util.service.FAbstractService;
+import com.tom.util.page.PageControlInfo;
+#foreach($import in $data.getImportList())
+import $import;
+#end
+#else
+$data.getDefImportContent()
+#end
+
+/// ***********************import end*************************
+@Service("$nameAlias$sfxService")
+public class $name$sfxServiceImpl
+      extends FAbstractService
+      implements
+         $data.getImplementsName(){
+
+   @Autowired
+   private $name$sfxDao $nameAlias$sfxDao;
+
+   /// ***********************define begin***********************
+#if($data.getDefPropertyContent() == "")
+#else
+$data.getDefPropertyContent()
+#end
+   /// ***********************define end*************************
+   @Override
+   public ${tableBean.getPkeyType()} save($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info(this, "save", "{0} is empty", "$entityAliasName");
+         return null;
+      }
+      this.saveBefore($entityAliasName);
+#if($tableBean.getValidOgid() == "Y")
+      ${entityAliasName}.setOgid(RUuid.makeUuid());
+#end
+#if($tableBean.getValidOver() == "Y")
+      ${entityAliasName}.setOver(makeOver(EOperation.Add.value(), ${entityAliasName}.getCreateUserId()));
+#end
+#if($tableBean.getValidCreateDate() == "Y")
+      ${entityAliasName}.setCreateDate(RDate.getCurrentTime());
+#end
+#if($tableBean.getValidUpdateDate() == "Y")
+      ${entityAliasName}.setUpdateDate(RDate.getCurrentTime());
+#end
+      Map<String, Object> map = ${nameAlias}${sfxDao}.save($entityAliasName);
+#if($tableBean.getPkeyType() == "String")
+      ${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()} = map.get("$tableBean.getPkeyFirstLower()").toString();
+#end
+#if($tableBean.getPkeyType() != "String")
+      ${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()} = RLong.toLong(map.get("$tableBean.getPkeyFirstLower()").toString());
+#end
+      this.saveAfter($entityAliasName);
+      return ${tableBean.getPkeyFirstLower()};
+   }
+
+   @Override
+   public boolean update($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info(this, "update", "{0} is empty", "$entityAliasName");
+         return false;
+      }
+      this.updateBefore($entityAliasName);
+      ${tableBean.getPkeyType()} id = ${entityAliasName}.get${tableBean.getPkeyFirstUpper()}();
+      if(null == id) {
+         _logger.info(this, "update", "{0} is empty", "${entityAliasName}.${tableBean.getPkeyFirstLower()}");
+         return false;
+      }
+#if($tableBean.getValidUpdateDate() == "Y")
+      ${entityAliasName}.setUpdateDate(RDate.getCurrentTime());
+#end
+      Integer result = ${nameAlias}${sfxDao}.update($entityAliasName);
+      
+      return result > 0;
+   }
+      
+   @Override
+   public $entityName load(${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()}){
+      if(null == ${tableBean.getPkeyFirstLower()}){
+         _logger.info(this, "load", "{0} is empty", "${tableBean.getPkeyFirstLower()}");
+         return null;
+      }
+      $entityName $entityAliasName = new ${entityName}();
+      ${entityAliasName}.set${tableBean.getPkeyFirstUpper()}(${tableBean.getPkeyFirstLower()});
+      return ${nameAlias}${sfxDao}.load($entityAliasName);
+   }
+
+   @Override
+   public $entityName load($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info(this, "load", "{0} is empty", "$entityAliasName");
+         return null;
+      }
+      return ${nameAlias}${sfxDao}.load($entityAliasName);
+   }
+
+   @Override
+   public Integer loadCount($entityName $entityAliasName) {
+      return ${nameAlias}${sfxDao}.loadCount($entityAliasName);
+   }
+   
+   @Override
+   public boolean isExist($entityName $entityAliasName) {
+      Integer count = loadCount($entityAliasName);
+      if(null == count) {
+         return false;
+      }
+      return count.intValue()>0;
+   }
+
+   private List<$entityName> findList($entityName $entityAliasName, Integer skip, Integer max){
+      return ${nameAlias}${sfxDao}.findList($entityAliasName, skip, max, null);
+   }
+
+   private PageControlInfo findPageList($entityName $entityAliasName, Integer skip, Integer max){
+      return ${nameAlias}${sfxDao}.findPageList($entityAliasName, skip, max, null);
+   }
+
+  
+
+}

@@ -1,0 +1,119 @@
+#set($aliasName = $data.getEntityAliasName())
+#set($dao = ${sfx_dao})
+#set($map = "Map")
+#set($seq = "$data.getDataName()_seq")
+#set($column = "$data.getDataName()_sql_col")
+#set($insertColumn = "$data.getDataName()_insert_sql_col")
+#set($selectColumn = "$data.getDataName()_select_sql_col")
+#set($comma = ",")
+#set($t = "t.")
+#set($w = "w.")
+#set($hs = "_hs")
+#set($count = $data.getFieldList().size())
+#set($table = $data.getDataName())
+#if($tableBean.getTypeCd() == "M") 
+#set($table = "${dynamicTableName}")
+#end
+#set($sqlType = $tableBean.getSqlType())
+#set($pkey = $tableBean.getPkey())
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="$data.getPackageName()$dao">
+   <resultMap type="$data.getEntityPackage()" id="$aliasName$map">
+#foreach($field in $data.getFieldList())
+#if($field.getIsPk() =="Y")
+	  <id property="$field.getName()" column="$field.getDataName()" />
+#else
+      <result property="$field.getName()" column="$field.getDataName()"/>
+#end
+#end
+
+   </resultMap>
+	
+	<insert id="save" parameterType="hashMap">
+	  #if($sqlType == "mysql")
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="${tableBean.getPkeyFirstLower()}">
+      	<![CDATA[SELECT LAST_INSERT_ID() AS ${tableBean.getPkeyFirstLower()} ]]>
+      </selectKey>
+      #end
+      #if($sqlType == "oracle")
+       <selectKey resultType="java.lang.Integer" order="BEFORE"  keyProperty="${tableBean.getPkeyFirstLower()}">
+     	 <![CDATA[select ${seq}.nextval AS ${tableBean.getPkeyFirstLower()} from dual  ]]>
+      </selectKey>
+       #end
+      INSERT INTO $table (#foreach($field in $data.getFieldList())#if($field.getTypeCd()=="R") $field.getDataName()#else$field.getDefaultValue() AS $field.getDataName()#end#if($!{velocityCount} != $count) $comma #end#end)
+      VALUES(#foreach($field in $data.getFieldList())#if($field.getTypeCd()=="R")#{$field.getName()#if($sqlType == "oracle")$comma jdbcType=$field.getMyBatisDataType()#end}#if($!{velocityCount} != $count),#end#end#end)
+   </insert>
+   
+    <delete id="delete" parameterType="hashMap">
+      DELETE FROM $table  WHERE ${pkey} = #{${tableBean.getPkeyFirstLower()}}
+   </delete>
+
+   <delete id="deleteByIds" parameterType="hashMap">
+      DELETE FROM $table WHERE ${pkey} in (
+      <foreach collection="list" item="${tableBean.getPkeyFirstLower()}" separator=",">
+            #{${tableBean.getPkeyFirstLower()}}
+        </foreach>
+        )
+   </delete>
+   
+   <update id="update" parameterType="hashMap">
+      UPDATE $table 
+      <set> 
+      #foreach($field in $data.getFieldList())
+      #if($field.getIsPk()!="Y")
+      #if($field.getTypeCd()=="R")
+      <if test="$field.getName() != null">  $field.getDataName()=#{$field.getName()#if($sqlType == "oracle")$comma jdbcType=$field.getMyBatisDataType()#end }  $comma  </if>
+      #end#end#end  </set>
+      WHERE ${pkey} = #{${tableBean.getPkeyFirstLower()}}
+   </update>
+   
+   
+   <select id="load" resultMap="$aliasName$map" parameterType="hashMap">
+      select * from $table where  1=1 
+       <if test="${tableBean.getPkeyFirstLower()} != null">
+	         AND ${pkey} = #{${tableBean.getPkeyFirstLower()}}
+	   </if>
+	    #if($sqlType == "mysql")
+         limit 1
+        #end
+		#if($sqlType == "oracle")
+        <![CDATA[  AND rownum <= 1  ]]>
+        #end
+   </select>
+   
+   <select id="findList" resultMap="$aliasName$map" parameterType="hashMap">
+     select * from $table where 1=1
+   </select>
+   
+   <sql id="page_where_sql">
+	      where 1=1
+	      <!--order by CREATE_TIME DESC-->
+   </sql>
+   
+   <select id="findPageList" resultMap="$aliasName$map" parameterType="hashMap">
+   #if($sqlType == "mysql")
+      select * from $table t 
+      <include refid="page_where_sql" />  
+      <if test="mysqlStart != null">
+            limit #{mysqlStart}, #{max}
+      </if>
+    #end 
+    #if($sqlType == "oracle")
+     <![CDATA[ 
+     SELECT * FROM (
+     		SELECT tt.*, ROWNUM AS rowno FROM (  
+     				SELECT t.* FROM $table t     ]]> <include refid="page_where_sql" />  <![CDATA[ 
+     				) tt  WHERE ROWNUM <= #{oracleEnd})
+     		ttt  WHERE ttt.rowno >= #{oracleStart}
+         ]]>
+    #end 
+   </select>
+   
+   <select id="findPageList_get_row_count" resultType="Integer">
+      SELECT count($t${tableBean.getPkeyFirstLower()}) FROM $table t
+      <include refid="page_where_sql" />
+   </select>
+ 
+</mapper>

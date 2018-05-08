@@ -1,0 +1,72 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name= $data.getClassName())
+#set($entityName= $data.getEntityName())
+#set($aliasName= $data.getClassAliasName())
+#set($entityAliasName= $data.getEntityAliasName())
+
+import java.util.List;
+import java.util.Map;
+
+import com.cat.common.bean.PageControlInfo;
+import org.apache.ibatis.annotations.Param;
+
+/**
+ * 表名：$data.getDataName()
+ * @author luoyang
+ */
+public interface ${name}$sfxDao {
+   /**
+    * 保存并返回主键
+    * @param $entityAliasName 实体
+    */
+   Map<String, Object> save(@Param("entity") $entityName $entityAliasName);
+
+   /**
+    * 删除
+    * @param $entityAliasName	实体
+    */
+   Integer delete(@Param("${tableBean.getPkeyFirstLower()}") ${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()});
+   
+   /**
+    * 删除
+    * @param $entityAliasName	实体
+    */
+   Integer deleteByIds(@Param("list")List<Integer> list);
+
+   /**
+    * 修改
+    * @param $entityAliasName	实体
+    */
+   Integer update(@Param("entity") $entityName $entityAliasName);
+   
+   /**
+    * 根据主键获取实体
+    * @param $entityAliasName	实体
+    * @return $name
+    */
+   $entityName load(@Param("entity") $entityName $entityAliasName);
+
+
+   /**
+    * 根据条件获取实体列表,当skip、max均等于null获取全部)
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数
+    * @param max	        页记录数
+    * @param params	        其他参数
+    * @return List<$name>
+    */
+   List<$entityName> findList(@Param("entity") $entityName $entityAliasName, @Param("skip") Integer start, @Param("max") Integer max, @Param("params") Map<String, Object> params);
+   
+   /**
+    * 根据条件获取实体分页列表
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数(当等于null时,返回null)
+    * @param max	        页记录数(默认为20)
+    * @param params	        其他参数
+    * @return PageControlInfo
+    */
+   PageControlInfo findPageList(@Param("entity") $entityName $entityAliasName, @Param("skip") Integer skip, @Param("max") Integer max, @Param("params") Map<String, Object> params);
+
+
+}

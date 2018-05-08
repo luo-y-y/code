@@ -1,0 +1,55 @@
+#parse("common.vm")
+package $data.getPackageName();
+#if($tableBean.getTypeCd() == "W")
+import com.tom.util.bean.BaseDataBean;
+#end
+#if($tableBean.getTypeCd() == "M")
+import com.tom.util.bean.FDynamicTableBean;
+import org.mobj.com.lang.RString;
+#end
+#foreach($import in $data.getImportList())
+import $import;
+#end
+/**
+ * 表名：[$data.getDataName()]$tableBean.getLabel()
+ * @author luoyang
+ */
+public class $data.getClassName()$sfxEntity
+      implements 
+          $data.getImplementsName(){
+
+   private static final long serialVersionUID = 1L;
+#foreach($field in $data.getFieldList())
+
+   /**
+#if($field.getTypeCd() == "V")
+    * 虚字段：$field.getLabel()
+#else
+    * $field.getLabel()
+#end 
+#if($field.getNote() != "")
+    * $field.getNote()
+#end
+    */
+   private $field.getDataType() $field.getName();
+#end
+
+
+#foreach($method in $data.getMethodList())
+
+   public $method.getResultType() get$method.getName()(){
+      return $method.getParamName();
+   }
+
+   public void set$method.getName()($method.getParamType() $method.getParamName()){
+      this.$method.getParamName() = $method.getParamName();
+   }
+#end
+#if($tableBean.getTypeCd() == "M")
+   public void buildDynamicTableName(String sfx) {
+      String tableName = RString.format("${data.getDataName()}_{0}", sfx);
+      setDynamicTableName(tableName);
+   }
+#end
+ 
+}

@@ -1,0 +1,175 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name = $data.getClassName())
+#set($nameAlias = $data.getClassAliasName())
+#set($entityName = $data.getEntityName())
+#set($entityAliasName = $data.getEntityAliasName())
+/// ***********************import begin***********************
+#if($data.getDefImportContent() == "")
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.mobj.com.lang.RString;
+import org.mobj.com.lang.RDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.tom.util.service.FAbstractService;
+import com.tom.util.page.PageControlInfo;
+#foreach($import in $data.getImportList())
+import $import;
+#end
+#else
+$data.getDefImportContent()
+#end
+
+/// ***********************import end*************************
+@Service("$nameAlias$sfxService")
+public class $name$sfxServiceImpl
+      extends FAbstractService
+      implements
+         $data.getImplementsName(){
+
+   @Autowired
+   private $name$sfxDao $nameAlias$sfxDao;
+
+   /// ***********************define begin***********************
+   /// ***********************define end*************************
+   @Override
+   @Transactional(rollbackFor=Exception.class)
+   public Long save($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info(this, "save", "{0} is empty", "$entityAliasName");
+         return null;
+      }
+      ${entityAliasName}.setCreateDate(RDate.getCurrentTime());
+      ${entityAliasName}.setUpdateDate(RDate.getCurrentTime());
+      Long id = ${nameAlias}${sfxDao}.save($entityAliasName);
+      if(null != id) {
+#if($isHistory == "Y") 
+         ${entityAliasName}.setHistoryCd("I");
+         ${entityAliasName}.setRecordId(id);
+         ${entityAliasName}.setId(null);
+         ${nameAlias}${sfxDao}.insertHs($entityAliasName);
+#end
+      }
+      return id;
+   }
+
+   @Override
+   public boolean delete(Long id){
+      if(null == id){
+         _logger.info(this, "delete", "{0} is empty", "id");
+         return false;
+      }
+      $entityName entity = load(id);
+      if(null == entity) {
+         _logger.info(this, "delete", "record not exist. id={0}", "id");
+         return false;
+      }
+      Integer result = ${nameAlias}${sfxDao}.delete(id);
+      if(result > 0) {
+#if($isHistory == "Y") 
+         entity.setHistoryCd("D");
+         insertHs(entity);
+#end
+      }
+      return result > 0;
+   }
+
+   @Override
+   @Transactional(rollbackFor=Exception.class)
+   public boolean deleteByIds(String ids){
+      if(RString.isBlank(ids)){
+         _logger.info(this, "deleteByIds", "{0} is empty", "ids");
+         return false;
+      }
+      String[] array = ids.split(",");
+      List<Long> list = new ArrayList<Long>();
+      for(String id : array){
+         list.add(Long.valueOf(id));
+      }
+      Integer result = ${nameAlias}${sfxDao}.deleteByIds(list);
+      return result > 0;
+   }
+
+   @Override
+   @Transactional(rollbackFor=Exception.class)
+   public boolean update($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info(this, "update", "{0} is empty", "$entityAliasName");
+         return false;
+      }
+      ${entityAliasName}.setUpdateDate(RDate.getCurrentTime());
+      Integer result = ${nameAlias}${sfxDao}.update($entityAliasName);
+      if(result > 0) {
+#if($isHistory == "Y") 
+         ${entityAliasName}.setHistoryCd("U");
+         insertHs($entityAliasName);
+#end
+      }
+      return result > 0;
+   }
+
+   @Override
+   public $entityName load(Long id){
+      if(null == id){
+         _logger.info(this, "load", "{0} is empty", "id");
+         return null;
+      }
+      $entityName $entityAliasName = new ${entityName}();
+      ${entityAliasName}.setId(id);
+      return ${nameAlias}${sfxDao}.load($entityAliasName);
+   }
+
+   @Override
+   public $entityName load($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info(this, "load", "{0} is empty", "$entityAliasName");
+         return null;
+      }
+      return ${nameAlias}${sfxDao}.load($entityAliasName);
+   }
+
+   @Override
+   public Integer loadCount($entityName $entityAliasName) {
+      return ${nameAlias}${sfxDao}.loadCount($entityAliasName);
+   }
+   
+   @Override
+   public boolean isExist($entityName $entityAliasName) {
+      Integer count = loadCount($entityAliasName);
+      if(null == count) {
+         return false;
+      }
+      return count.intValue()>0;
+   }
+
+   @Override
+   public List<$entityName> findList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params){
+      return ${nameAlias}${sfxDao}.findList($entityAliasName, skip, max, params);
+   }
+
+   @Override
+   public PageControlInfo findPageList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params){
+      return ${nameAlias}${sfxDao}.findPageList($entityAliasName, skip, max, params);
+   }
+
+#if($isHistory == "Y") 
+   private void insertHs($entityName $entityAliasName){
+      ${entityAliasName}.setRecordId(${entityAliasName}.getId());
+      ${entityAliasName}.setId(null);
+      ${nameAlias}${sfxDao}.insertHs($entityAliasName);
+   }
+
+   @Override
+   public PageControlInfo findPageHsList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params){
+      return ${nameAlias}${sfxDao}.findPageHsList($entityAliasName, skip, max, params);
+   }
+#end
+   /// ***********************method begin***********************
+$data.getDefMethodContent()
+   /// ***********************method end*************************
+
+}

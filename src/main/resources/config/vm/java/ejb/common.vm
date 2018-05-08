@@ -1,0 +1,8 @@
+#set($sfxEntity = ${sfx_entity})
+#set($sfxDao = ${sfx_dao})
+#set($sfxDaoImpl = ${sfx_daoImpl})
+#set($sfxDaoHi = ${sfx_daoHi})
+#set($sfxService = ${sfx_service})
+#set($sfxServiceImpl = ${sfx_serviceImpl})
+#set($sfxMybatis = ${sfx_mybatis})
+#set($sfxAction = ${sfx_action})

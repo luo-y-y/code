@@ -1,0 +1,44 @@
+#parse("common.vm")
+package $data.getPackageName();
+#if($isHistory == "Y")
+import com.tom.util.bean.BaseDataBean;
+#end
+#foreach($import in $data.getImportList())
+import $import;
+#end
+/**
+ * 表名：$data.getDataName()
+ * @author Administrator
+ */
+public class $data.getClassName()$sfxEntity
+#if($isHistory == "Y") 
+      extends BaseDataBean 
+#end
+      implements 
+          $data.getImplementsName(){
+
+   private static final long serialVersionUID = 1L;
+#foreach($field in $data.getFieldList())
+
+   /**
+    * $field.getLabel()
+    */
+   private $field.getDataType() $field.getName();
+#end
+   /// ***********************define begin***********************
+$data.getDefPropertyContent()
+   /// ***********************define end*************************
+#foreach($method in $data.getMethodList())
+
+   public $method.getResultType() get$method.getName()(){
+      return $method.getParamName();
+   }
+
+   public void set$method.getName()($method.getParamType() $method.getParamName()){
+      this.$method.getParamName() = $method.getParamName();
+   }
+#end
+   /// ***********************method begin***********************
+$data.getDefMethodContent()
+   /// ***********************method end*************************
+}

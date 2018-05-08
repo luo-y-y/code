@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.cat.code.dao.ds.DsTableDao">
+   <resultMap type="com.cat.code.bean.ds.DsTable" id="dsTableMap">
+	  <id property="id" column="ID" />
+      <result property="ogid" column="OGID"/>
+      <result property="over" column="OVER"/>
+      <result property="isValid" column="IS_VALID"/>
+      <result property="typeCd" column="TYPE_CD"/>
+      <result property="code" column="CODE"/>
+      <result property="name" column="NAME"/>
+      <result property="label" column="LABEL"/>
+      <result property="tablespaceName" column="TABLESPACE_NAME"/>
+      <result property="sequenceName" column="SEQUENCE_NAME"/>
+      <result property="linkUnique" column="LINK_UNIQUE"/>
+      <result property="datasourceId" column="DATASOURCE_ID"/>
+      <result property="createUserId" column="CREATE_USER_ID"/>
+      <result property="createDate" column="CREATE_DATE"/>
+      <result property="updateUserId" column="UPDATE_USER_ID"/>
+      <result property="createUserLabel" column="CREATE_USER_LABEL"/>
+      <result property="updateUserLabel" column="UPDATE_USER_LABEL"/>
+      <result property="updateDate" column="UPDATE_DATE"/>
+      <result property="note" column="NOTE"/>
+      <result property="historyCd" column="HISTORY_CD" />
+      <result property="recordId" column="RECORD_ID" />
+   </resultMap>
+	
+   <sql id="ds_table_select_sql_col">
+      t.ID, t.OGID, t.OVER, t.IS_VALID, t.TYPE_CD, t.CODE, t.NAME, t.LABEL, t.TABLESPACE_NAME, t.SEQUENCE_NAME, t.LINK_UNIQUE, t.DATASOURCE_ID, t.CREATE_USER_ID, t.CREATE_DATE, t.UPDATE_USER_ID,t.UPDATE_DATE, t.NOTE
+   </sql>
+   
+   <sql id="ds_table_insert_sql_col">
+      ID, OGID, OVER, IS_VALID, TYPE_CD, CODE, NAME, LABEL, TABLESPACE_NAME, SEQUENCE_NAME, LINK_UNIQUE, DATASOURCE_ID, CREATE_USER_ID, CREATE_DATE, UPDATE_USER_ID, UPDATE_DATE, NOTE
+   </sql>
+
+   <sql id="select_head_sql">
+      SELECT <include refid="ds_table_select_sql_col" /> FROM ds_table t
+   </sql>
+
+   <sql id="select_count_sql">
+      SELECT count(t.ID) FROM ds_table t
+   </sql>
+   <sql id="mysql_page_sql">
+      <if test="mysqlStart != null">
+      limit #{mysqlStart}, #{max}
+      </if>
+   </sql>
+   <!--***********************define begin***********************-->
+   <sql id="list_where_sql">
+      where 1=1
+      <if test="datasourceId != null">
+	      and t.DATASOURCE_ID = #{datasourceId}
+	  </if>
+	  ORDER BY t.ID
+   </sql>
+   <sql id="page_where_sql">
+      where 1=1
+      <if test="datasourceId != null">
+	      and t.DATASOURCE_ID = #{datasourceId}
+	  </if>
+	  <if test="code != null and code != ''">
+	      and t.CODE LIKE CONCAT(#{code},'%')  
+	  </if>
+	  <if test="label != null and label !=''">
+	      and t.LABEL LIKE CONCAT(#{label},'%')  
+	  </if>
+	  ORDER BY t.UPDATE_DATE DESC
+   </sql>
+   <sql id="count_where_sql">
+      where 1=1
+   </sql>
+   <sql id="loadcount_where_sql">
+      where 1=1
+      <if test="datasourceId != null">
+	      and t.DATASOURCE_ID = #{datasourceId}
+	  </if>
+	  <if test="code != null">
+	      and t.CODE = #{code}
+	  </if>
+   </sql>
+   <sql id="load_where_sql">
+      where 1=1
+      <if test="id != null">
+         AND t.ID = #{id}
+      </if>
+   </sql>
+   <sql id="hs_page_where_sql">
+      where 1=1
+         AND t.RECORD_ID = #{recordId}
+      ORDER BY t.UPDATE_DATE DESC
+   </sql>
+   <sql id="hs_load_where_sql">
+      where 1=1
+      <if test="id != null">
+         AND t.ID = #{id}
+      </if>
+   </sql>
+
+   <!--***********************define end*************************-->
+   <insert id="save" parameterType="hashMap">
+      <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+      <![CDATA[SELECT LAST_INSERT_ID() AS id ]]>
+      </selectKey>
+      INSERT INTO ds_table (<include refid="ds_table_insert_sql_col" />) 
+      VALUES(#{id},#{ogid},#{over},#{isValid},#{typeCd},#{code},#{name},#{label},#{tablespaceName},#{sequenceName},#{linkUnique},#{datasourceId},#{createUserId},#{createDate},#{updateUserId},#{updateDate},#{note})
+   </insert>
+
+   <delete id="delete" parameterType="hashMap">
+      DELETE FROM ds_table WHERE ID = #{id}
+   </delete>
+
+   <delete id="deleteByIds" parameterType="hashMap">
+      DELETE FROM ds_table WHERE ID in
+      <foreach collection="idList" item="ids" open="(" separator="," close=")">
+         #{ids}
+      </foreach>
+   </delete>
+
+   <update id="update" parameterType="hashMap">
+      UPDATE ds_table SET OGID=#{ogid},OVER=#{over},IS_VALID=#{isValid},TYPE_CD=#{typeCd},CODE=#{code},NAME=#{name},LABEL=#{label},TABLESPACE_NAME=#{tablespaceName},SEQUENCE_NAME=#{sequenceName},LINK_UNIQUE=#{linkUnique},DATASOURCE_ID=#{datasourceId},CREATE_USER_ID=#{createUserId},CREATE_DATE=#{createDate},UPDATE_USER_ID=#{updateUserId},UPDATE_DATE=#{updateDate},NOTE=#{note}
+      WHERE ID = #{id}
+   </update>
+
+   <select id="load" resultMap="dsTableMap" parameterType="hashMap">
+      <include refid="select_head_sql" />
+      <include refid="load_where_sql" />
+   </select>
+   
+   <select id="loadCount" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="loadcount_where_sql" />
+   </select>
+   
+   <select id="findList" resultMap="dsTableMap" parameterType="hashMap">
+      <include refid="select_head_sql" /> 
+      <include refid="list_where_sql" />
+      <include refid="mysql_page_sql" />
+   </select>
+
+   <select id="findPageList" resultMap="dsTableMap" parameterType="hashMap">
+      <include refid="select_head_sql" />
+      <include refid="page_where_sql" />
+      <include refid="mysql_page_sql" />
+   </select>
+  
+   <select id="findPageList_get_row_count" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="page_where_sql" />
+   </select>
+
+   <!--***********************method begin**********************-->
+
+   <!--***********************method end***********************-->
+
+
+</mapper>

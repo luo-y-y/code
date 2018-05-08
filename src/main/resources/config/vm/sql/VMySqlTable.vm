@@ -1,0 +1,28 @@
+#set($table = $data.getDataName())
+
+DROP TABLE IF EXISTS `$table`;
+CREATE TABLE `$table` (
+#foreach($field in $data.getFieldList())
+#if($field.getIsPk() =="Y")
+   `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) NOT NULL AUTO_INCREMENT COMMENT '$field.getLabel()$field.getNote()',
+#elseif($field.getDbDataType() == "timestamp")
+   `$field.getDataName()` timestamp NULL COMMENT '$field.getLabel()',
+#elseif($field.getTypeCd()=="R")
+   `$field.getDataName()` $field.getDbDataType()#if($field.getDataLength() !='')($field.getDataLength())#end #if($field.getIsNull() == "N") NOT NULL #elseif($field.getDefaultValue() != "") DEFAULT '$field.getDefaultValue()' #else DEFAULT NULL #end
+COMMENT '$field.getLabel()$field.getNote()',
+#end
+#end
+   PRIMARY KEY (`$tableBean.getPkey()`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+#foreach($field in $data.getFieldList())
+#if($field.getIsUnique() =="Y")
+ALTER TABLE $table DROP INDEX `UK_$field.getDataName()`;
+CREATE UNIQUE INDEX `UK_$field.getDataName()` ON $table(`$field.getDataName()`);
+#end
+#end
+
+#if($tableBean.getLinkUnique() != "")
+ALTER TABLE $table DROP INDEX `uk_link_$table`;
+CREATE UNIQUE INDEX `uk_link_$table` ON $table($tableBean.getLinkUnique());
+#end

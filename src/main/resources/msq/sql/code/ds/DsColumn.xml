@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.cat.code.dao.ds.DsColumnDao">
+   <resultMap type="com.cat.code.bean.ds.DsColumn" id="dsColumnMap">
+	  <id property="id" column="ID" />
+      <result property="ogid" column="OGID"/>
+      <result property="over" column="OVER"/>
+      <result property="isValid" column="IS_VALID"/>
+      <result property="code" column="CODE"/>
+      <result property="name" column="NAME"/>
+      <result property="label" column="LABEL"/>
+      <result property="datasourceId" column="DATASOURCE_ID"/>
+      <result property="tableId" column="TABLE_ID"/>
+      <result property="dataType" column="DATA_TYPE"/>
+      <result property="dataLength" column="DATA_LENGTH"/>
+      <result property="defaultValue" column="DEFAULT_VALUE"/>
+      <result property="isNull" column="IS_NULL"/>
+      <result property="sortNum" column="SORT_NUM"/>
+      <result property="isPk" column="IS_PK"/>
+      <result property="isUnique" column="IS_UNIQUE"/>
+      <result property="foreignKey" column="FOREIGN_KEY"/>
+      <result property="typeCd" column="TYPE_CD"/>
+      <result property="createUserId" column="CREATE_USER_ID"/>
+      <result property="createDate" column="CREATE_DATE"/>
+      <result property="updateUserId" column="UPDATE_USER_ID"/>
+      <result property="updateDate" column="UPDATE_DATE"/>
+      <result property="note" column="NOTE"/>
+      <result property="historyCd" column="HISTORY_CD" />
+      <result property="recordId" column="RECORD_ID" />
+   </resultMap>
+	
+   <sql id="ds_column_select_sql_col">
+      t.ID, t.OGID, t.OVER, t.IS_VALID, t.CODE, t.NAME, t.LABEL, t.DATASOURCE_ID, t.TABLE_ID, t.DATA_TYPE, t.DATA_LENGTH, t.DEFAULT_VALUE, t.IS_NULL, t.SORT_NUM, t.IS_PK, t.IS_UNIQUE, t.FOREIGN_KEY, t.TYPE_CD, t.CREATE_USER_ID, t.CREATE_DATE, t.UPDATE_USER_ID, t.UPDATE_DATE, t.NOTE
+   </sql>
+   
+   <sql id="ds_column_insert_sql_col">
+      ID, OGID, OVER, IS_VALID, CODE, NAME, LABEL, DATASOURCE_ID, TABLE_ID, DATA_TYPE, DATA_LENGTH, DEFAULT_VALUE, IS_NULL, SORT_NUM, IS_PK, IS_UNIQUE, FOREIGN_KEY, TYPE_CD, CREATE_USER_ID, CREATE_DATE, UPDATE_USER_ID, UPDATE_DATE, NOTE
+   </sql>
+
+   <sql id="select_head_sql">
+      SELECT <include refid="ds_column_select_sql_col" /> FROM ds_column t
+   </sql>
+
+   <sql id="select_count_sql">
+      SELECT count(t.ID) FROM ds_column t
+   </sql>
+   <sql id="mysql_page_sql">
+      <if test="mysqlStart != null">
+      limit #{mysqlStart}, #{max}
+      </if>
+   </sql>
+   <!--***********************define begin***********************-->
+   <sql id="list_where_sql">
+      where 1=1
+      <if test="datasourceId != null">
+	      and t.DATASOURCE_ID = #{datasourceId}
+	  </if>
+      <if test="tableId != null">
+	      and t.TABLE_ID = #{tableId}
+	  </if>
+	  ORDER BY t.SORT_NUM ASC
+   </sql>
+   <sql id="page_where_sql">
+      where 1=1
+      <if test="tableId != null">
+	      and t.TABLE_ID = #{tableId}
+	  </if>
+	  ORDER BY t.SORT_NUM ASC
+   </sql>
+   <sql id="count_where_sql">
+      where 1=1
+   </sql>
+   <sql id="load_where_sql">
+      where 1=1
+      <if test="id != null">
+         AND t.ID = #{id}
+      </if>
+   </sql>
+   <sql id="loadcount_where_sql">
+      where 1=1
+   </sql>
+   <sql id="hs_page_where_sql">
+      where 1=1
+         AND t.RECORD_ID = #{recordId}
+      ORDER BY t.UPDATE_DATE DESC
+   </sql>
+   <sql id="hs_load_where_sql">
+      where 1=1
+      <if test="id != null">
+         AND t.ID = #{id}
+      </if>
+   </sql>
+
+   <!--***********************define end*************************-->
+   <insert id="save" parameterType="hashMap">
+      <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+      <![CDATA[SELECT LAST_INSERT_ID() AS id ]]>
+      </selectKey>
+      INSERT INTO ds_column (<include refid="ds_column_insert_sql_col" />) 
+      VALUES(#{id},#{ogid},#{over},#{isValid},#{code},#{name},#{label},#{datasourceId},#{tableId},#{dataType},#{dataLength},#{defaultValue},#{isNull},#{sortNum},#{isPk},#{isUnique},#{foreignKey},#{typeCd},#{createUserId},#{createDate},#{updateUserId},#{updateDate},#{note})
+   </insert>
+
+   <delete id="delete" parameterType="hashMap">
+      DELETE FROM ds_column WHERE ID = #{id}
+   </delete>
+
+   <delete id="deleteByIds" parameterType="hashMap">
+      DELETE FROM ds_column WHERE ID in
+      <foreach collection="idList" item="ids" open="(" separator="," close=")">
+         #{ids}
+      </foreach>
+   </delete>
+
+   <update id="update" parameterType="hashMap">
+      UPDATE ds_column SET OGID=#{ogid},OVER=#{over},IS_VALID=#{isValid},CODE=#{code},NAME=#{name},LABEL=#{label},DATASOURCE_ID=#{datasourceId},TABLE_ID=#{tableId},DATA_TYPE=#{dataType},DATA_LENGTH=#{dataLength},DEFAULT_VALUE=#{defaultValue},IS_NULL=#{isNull},SORT_NUM=#{sortNum},IS_PK=#{isPk},IS_UNIQUE=#{isUnique},FOREIGN_KEY=#{foreignKey},TYPE_CD=#{typeCd},CREATE_USER_ID=#{createUserId},CREATE_DATE=#{createDate},UPDATE_USER_ID=#{updateUserId},UPDATE_DATE=#{updateDate},NOTE=#{note}
+      WHERE ID = #{id}
+   </update>
+
+   <select id="load" resultMap="dsColumnMap" parameterType="hashMap">
+      <include refid="select_head_sql" />
+      <include refid="load_where_sql" />
+   </select>
+   
+   <select id="loadCount" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="loadcount_where_sql" />
+   </select>
+   
+   <select id="findList" resultMap="dsColumnMap" parameterType="hashMap">
+      <include refid="select_head_sql" /> 
+      <include refid="list_where_sql" />
+      <include refid="mysql_page_sql" />
+   </select>
+
+   <select id="findPageList" resultMap="dsColumnMap" parameterType="hashMap">
+      <include refid="select_head_sql" />
+      <include refid="page_where_sql" />
+      <include refid="mysql_page_sql" />
+   </select>
+  
+   <select id="findPageList_get_row_count" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="page_where_sql" />
+   </select>
+
+   <!--***********************method begin**********************-->
+
+   <!--***********************method end***********************-->
+
+
+</mapper>

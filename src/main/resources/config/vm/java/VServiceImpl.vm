@@ -1,0 +1,123 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name = $data.getClassName())
+#set($nameAlias = $data.getClassAliasName())
+#set($entityName = $data.getEntityName())
+#set($entityAliasName = $data.getEntityAliasName())
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import com.cat.common.bean.RResult;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cat.common.bean.PageControlInfo;
+
+
+/// ***********************import end*************************
+@Service("$nameAlias$sfxService")
+public class $name$sfxService {
+  
+   private static Logger _logger = Logger.getLogger($name$sfxService .class);
+    
+   @Autowired
+   private $name$sfxDao $nameAlias$sfxDao;
+
+
+   public Integer save($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info("save  $entityAliasName is empty");
+         return null;
+      }
+
+#if($tableBean.getValidCreateDate() == "Y")
+      ${entityAliasName}.setCreateTime(RDate.getCurrentTime());
+#end
+#if($tableBean.getValidUpdateDate() == "Y")
+      ${entityAliasName}.setUpdateTime(RDate.getCurrentTime());
+#end
+      Map<String, Object> map = ${nameAlias}${sfxDao}.save($entityAliasName);
+#if($tableBean.getPkeyType() == "String")
+      ${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()} = map.get("$tableBean.getPkeyFirstLower()").toString();
+#end
+#if($tableBean.getPkeyType() != "String")
+      ${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()} = Integer.parseInt(map.get("$tableBean.getPkeyFirstLower()").toString());
+#end
+      return ${tableBean.getPkeyFirstLower()};
+   }
+   
+   public boolean delete(${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()}){
+      if(null == ${tableBean.getPkeyFirstLower()}){
+         _logger.info("delete ${tableBean.getPkeyFirstLower()} is empty");
+         return false;
+      }
+      Integer result = ${nameAlias}${sfxDao}.delete(${tableBean.getPkeyFirstLower()});
+      return result > 0;
+   }
+   
+   public boolean deleteByIds(String ${tableBean.getPkeyFirstLower()}s){
+      if(null == ${tableBean.getPkeyFirstLower()}s){
+         return false;
+      }
+      String[] array = ${tableBean.getPkeyFirstLower()}s.split(",");
+      List<Integer> list = new ArrayList<Integer>();
+      for (String id : array) {
+         list.add(Integer.parseInt(id));
+      }
+      Integer result = ${nameAlias}${sfxDao}.deleteByIds(list);
+      return result > 0;
+   }
+   
+
+   
+   public boolean update($entityName newEntity){
+      if(null == newEntity){
+         _logger.info("update  param is empty");
+         return false;
+      }
+
+      #if($tableBean.getValidUpdateDate() == "Y")
+         newEntity.setUpdateTime(RDate.getCurrentTime());
+       #end
+       Integer result = ${nameAlias}${sfxDao}.update(newEntity);
+       if(result > 0){
+          return true;
+         }
+       return false;
+   }
+
+   
+   public $entityName load(${tableBean.getPkeyType()} ${tableBean.getPkeyFirstLower()}){
+      if(null == ${tableBean.getPkeyFirstLower()}){
+         _logger.info("load  ${tableBean.getPkeyFirstLower()} is empty");
+         return null;
+      }
+      $entityName $entityAliasName = new ${entityName}();
+      ${entityAliasName}.set${tableBean.getPkeyFirstUpper()}(${tableBean.getPkeyFirstLower()});
+      return ${nameAlias}${sfxDao}.load($entityAliasName);
+   }
+
+   
+   public $entityName load($entityName $entityAliasName){
+      if(null == $entityAliasName){
+         _logger.info("load  $entityAliasName is empty");
+         return null;
+      }
+      return ${nameAlias}${sfxDao}.load($entityAliasName);
+   }
+
+
+   
+   public List<$entityName> findList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params){
+      return ${nameAlias}${sfxDao}.findList($entityAliasName, skip, max, params);
+   }
+
+   
+   public PageControlInfo findPageList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params){
+      return ${nameAlias}${sfxDao}.findPageList($entityAliasName, skip, max, params);
+   }
+
+}

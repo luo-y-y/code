@@ -1,0 +1,25 @@
+#set($table = $data.getDataName())
+#foreach($field in $data.getFieldList())
+#if($field.getIsPk() =="Y")
+   ALTER TABLE $table ADD $field.getDataName() $field.getDbDataType()($field.getDataLength()) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY;
+   ALTER TABLE $table MODIFY `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) COMMENT '$field.getLabel()$field.getNote()';
+
+#elseif($field.getDbDataType() == "timestamp")
+   ALTER TABLE $table ADD $field.getDataName() timestamp NULL DEFAULT NULL;
+   ALTER TABLE $table MODIFY `$field.getDataName()` timestamp COMMENT '$field.getLabel()$field.getNote()';
+
+#elseif($field.getTypeCd()=="R" && ($field.getDbDataType() == "bigint" || $field.getDbDataType() == "int" || $field.getDbDataType() == "integer"))
+   ALTER TABLE $table ADD `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) #if($field.getIsNull() == "N") NOT NULL #elseif($field.getDefaultValue() != "") DEFAULT '$field.getDefaultValue()' #else DEFAULT NULL #end;
+   ALTER TABLE $table MODIFY `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) COMMENT '$field.getLabel()$field.getNote()';
+   
+#elseif($field.getTypeCd()=="R" && ($field.getDbDataType() == "varchar" || $field.getDbDataType() == "char"))
+   ALTER TABLE $table ADD `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) CHARACTER SET utf8 COLLATE utf8_general_ci #if($field.getIsNull() == "N") NOT NULL #elseif($field.getDefaultValue() != "") DEFAULT '$field.getDefaultValue()' #else DEFAULT NULL #end;
+   ALTER TABLE $table MODIFY `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) COMMENT '$field.getLabel()$field.getNote()';
+
+#elseif($field.getTypeCd()=="R")
+   ALTER TABLE $table ADD `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) #if($field.getIsNull() == "N") NOT NULL #elseif($field.getDefaultValue() != "") DEFAULT '$field.getDefaultValue()' #else DEFAULT NULL #end;
+   ALTER TABLE $table MODIFY `$field.getDataName()` $field.getDbDataType()($field.getDataLength()) COMMENT '$field.getLabel()$field.getNote()';
+
+#end
+#end
+

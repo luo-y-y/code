@@ -1,0 +1,109 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name= $data.getClassName())
+#set($entityName= $data.getEntityName())
+#set($aliasName= $data.getClassAliasName())
+#set($entityAliasName= $data.getEntityAliasName())
+/// ***********************import begin***********************
+#if($data.getDefImportContent() == "")
+import java.util.List;
+import java.util.Map;
+
+import com.tom.util.data.annotation.AParam;
+import com.tom.util.page.PageControlInfo;
+#foreach($import in $data.getImportList())
+import $import;
+#end
+#else
+$data.getDefImportContent()
+#end
+
+/// ***********************import end*************************
+/**
+ * 表名：$data.getDataName()
+ * @author Administrator
+ */
+public interface ${name}$sfxDao extends $data.getExtendsName(){
+   /**
+    * 保存
+    * @param $aliasName 实体
+    */
+   void insert(@AParam("entity") $entityName $entityAliasName);
+
+   /**
+    * 保存并返回主键
+    * @param $entityAliasName 实体
+    */
+   Long save(@AParam("entity") $entityName $entityAliasName);
+
+   /**
+    * 删除
+    * @param $entityAliasName	实体
+    */
+   Integer delete(@AParam("id") Long id);
+
+   /**
+    * 删除多条数据
+    * @param idList	主键列表
+    */
+   Integer deleteByIds(@AParam("idList") List<Long> idList);
+
+   /**
+    * 修改
+    * @param $entityAliasName	实体
+    */
+   Integer update(@AParam("entity") $entityName $entityAliasName);
+   
+   /**
+    * 根据主键获取实体
+    * @param $entityAliasName	实体
+    * @return $name
+    */
+   $entityName load(@AParam("entity") $entityName $entityAliasName);
+
+   /**
+    * 根据主键获取实体
+    * @param id	主键
+    * @return $name
+    */
+   Integer loadCount(@AParam("entity") $entityName $entityAliasName);
+
+   /**
+    * 根据条件获取实体列表,当skip、max均等于null获取全部)
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数
+    * @param max	        页记录数
+    * @param params	        其他参数
+    * @return List<$name>
+    */
+   List<$entityName> findList(@AParam("entity") $entityName $entityAliasName, @AParam("skip") Integer start, @AParam("max") Integer max, @AParam("params") Map<String, Object> params);
+   
+   /**
+    * 根据条件获取实体分页列表
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数(当等于null时,返回null)
+    * @param max	        页记录数(默认为20)
+    * @param params	        其他参数
+    * @return PageControlInfo
+    */
+   PageControlInfo findPageList(@AParam("entity") $entityName $entityAliasName, @AParam("skip") Integer skip, @AParam("max") Integer max, @AParam("params") Map<String, Object> params);
+#if($isHistory == "Y") 
+   /**
+    * 保存操作历史
+    * @param $aliasName 实体
+    */
+   void insertHs(@AParam("entity") $entityName $entityAliasName);
+   /**
+    * 根据条件获取实体历史操作分页列表
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数(当等于null时,返回null)
+    * @param max	        页记录数(默认为20)
+    * @param params	        其他参数
+    * @return PageControlInfo
+    */
+   PageControlInfo findPageHsList(@AParam("entity") $entityName $entityAliasName, @AParam("skip") Integer skip, @AParam("max") Integer max, @AParam("params") Map<String, Object> params);
+#end
+   /// ***********************method begin***********************
+$data.getDefMethodContent()
+   /// ***********************method end*************************
+}

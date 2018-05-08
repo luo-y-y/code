@@ -1,0 +1,177 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name = $data.getClassName())
+#set($aliasName = $data.getClassAliasName())
+/// ***********************import begin***********************
+#if($data.getDefImportContent() == "")
+import java.text.MessageFormat;
+import java.util.Map;
+
+import org.mobj.com.lang.RLong;
+import org.mobj.com.lang.RString;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.ParentPackage;
+import org.apache.struts2.convention.annotation.Result;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+import com.tom.common.BaseAction;
+import com.tom.util.json.RJson;
+import com.tom.util.page.PageControlInfo;
+import com.tom.util.reflect.RReflectUtils;
+#foreach($import in $data.getImportList())
+import $import;
+#end
+#else
+$data.getDefImportContent()
+#end
+/// ***********************import end*************************
+@ParentPackage("base")
+@Controller
+@Scope("prototype")
+public class ${name}$sfxAction
+      extends BaseAction{
+   
+   private static final long serialVersionUID = 1L;
+   @Autowired
+   private $name$sfxService $aliasName$sfxService;
+
+   /// ***********************define begin***********************
+$data.getDefPropertyContent()
+   /// ***********************define end*************************
+   /**
+    * 介绍页面
+    */
+   public String goIntroduce(){
+      return "introduce";
+   }
+
+   /**
+    * 主页面
+    */
+   public String goMain(){
+      return "${aliasName}List";
+   }
+   
+   /**
+    * 新增页面
+    */
+   public String goAdd(){
+      return "${aliasName}Form";
+   }
+
+   /**
+    * 查看页面
+    */
+   public String goView(){
+      return "${aliasName}Form";
+   }
+
+   /**
+    * 编辑页面
+    */
+   @Action(value = "goEdit", results = { @Result(name = "${aliasName}Form", type = "json", params = { "root", "result" }) })
+   public void goEdit(){
+      try {
+         String id = getRequestParameter("id");
+         if(RString.isBlank(id)){
+            _logger.info(this, "goEdit", "{0} is empty", "id");
+         }
+         $name entity = ${aliasName}${sfxService}.load(RLong.toLong(id));
+         result = RJson.getJson(entity);
+      } catch (Exception e) {
+         _logger.error(this, "goEdit", e);
+      }
+      getPrintWriter().write(result.toString());
+   }
+
+   /**
+    * 保存/更新
+    */
+   public void doSave(){
+      try {
+         Map<String, Object> map = getRequestParameterMap();
+         $name entity = new $name();
+         RReflectUtils.getObjectForMap(entity, map);
+         if(null == entity.getId() || 0 == entity.getId()){
+            save(entity);
+            return;
+         }
+         update(entity);
+      } catch (Exception e) {
+         _logger.error(this, "doSave", e);
+      }
+   }
+
+   /**
+    * 保存逻辑
+    */
+   private void save($name entity){
+      Long id = ${aliasName}${sfxService}.save(entity);
+      if(id >0){
+         getPrintWriter().write(MessageFormat.format(message, "Y"));
+         return;
+      }
+      _logger.info(this, "save", "{0}","保存失败");
+      getPrintWriter().write(MessageFormat.format(message, "N"));
+   }
+
+   /**
+    * 修改逻辑
+    */
+   private void update($name entity){
+      boolean bool = ${aliasName}${sfxService}.update(entity);
+      if(bool){
+         getPrintWriter().write(MessageFormat.format(message, "Y"));
+         return;
+      }
+      _logger.info(this, "update", "update fail, param[id={0}]", entity.getId());
+      getPrintWriter().write(MessageFormat.format(message, "N"));
+   }
+
+   /**
+    * 删除
+    */
+   public String doDelete(){
+      try {
+         String ids = getRequestParameter("ids");
+         if(RString.isBlank(ids)){
+            result = RJson.getJson(MessageFormat.format(message, "N"));
+	    _logger.info(this, "doDelete", "{0} is empty", "ids");
+	    return "findPageList";
+         }
+         boolean bool = ${aliasName}${sfxService}.deleteByIds(ids);
+	 if(bool){
+            result = RJson.getJson(MessageFormat.format(message, "Y"));
+	 }else{
+            result = RJson.getJson(MessageFormat.format(message, "N"));
+            _logger.info(this, "doDelete", "delete fail, param[ids={0}]", "ids");
+         }
+      } catch (Exception e) {
+         _logger.error(this, "doDelete", e);
+      }
+      return "findPageList";
+   }
+
+   /**
+    * 列表查询
+    */
+   @Action(results = { @Result(type = "json", params = { "root", "result" }) })
+   public void findPageList(){
+      try {
+         Map<String,Object> map = getRequestParameterMap();
+         $name entity = new $name();
+         RReflectUtils.getObjectForMap(entity, map);
+         PageControlInfo pageInfo = ${aliasName}${sfxService}.findPageList(entity, getPage(), getEnd(), loadOsearch());
+         formatJosn(pageInfo);
+      } catch (Exception e) {
+         _logger.error(this, "findPageList", e);
+      }
+   }
+
+   /// ***********************method begin***********************
+$data.getDefMethodContent()
+   /// ***********************method end*************************
+
+}

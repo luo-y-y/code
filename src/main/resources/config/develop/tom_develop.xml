@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config name="user" label="用户生成资源">
+	<Define name='build'>D:/Work_TOM/tom_develop/trunk/</Define>
+	<Define name='build.java'>${build}/src/main/java/</Define>
+	<Define name='build.resources'>${build}/src/main/resources/</Define>
+	<Define name='sfx.entity'></Define>
+	<Define name='sfx.dao'>Dao</Define>
+	<Define name='sfx.daoHi'>HiDao</Define>
+	<Define name='sfx.service'>Service</Define>
+	<Define name='sfx.serviceImpl'>ServiceImpl</Define>
+	<Define name='sfx.action'>Action</Define>
+	<Define name='sfx.mybatis'></Define>
+	<Define name='pkg.entity'>com.tom.entity</Define>
+	<Define name='pkg.dao'>com.tom.dao.mysql</Define>
+	<Define name='pkg.service'>com.tom.service</Define>
+	<Define name='pkg.action'>com.tom.action</Define>
+	<Component name="bean" type="Bean" label="生成javaBean">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.entity}/{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.entity}.java" />
+		<Property name="templetFilePath" label="模板路径" value="config/vm/java/" />
+		<Property name="templetFile" label="模板文件" value="VBean.vm" />
+		<Property name="packagePath" label="包路径,{0}表示表名格式:pm.user" value="${pkg.entity}.{0}" />
+		<Property name="implInterface" label="所实现的接口,本参数可重复,重复时表示实现多个接口,多个接口用逗号隔开" value="java.io.Serializable" />
+	</Component>
+	<Component name="dao" type="Dao" label="生成Dao">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.dao}/{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.dao}.java" />
+		<Property name="templetFilePath" label="模板文件的路径" value="config/vm/java/" />
+		<Property name="templetFile" label="模板文件" value="VDao.vm" />
+		<Property name="packagePath" label="包路径,0右边包" value="${pkg.dao}.{0}" />
+		<Property name="entityPackage" label="实体包,,0右边包,1表实体名" value="${pkg.entity}.{0}.{1}${sfx.entity}" />
+		<Property name="superClassPackage" label="所继承的父类" value="com.tom.util.data.IAbstractIbatisDao" />
+	</Component>
+	<Component name="service" type="Service" label="生成Service">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.service}/{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.service}.java" />
+		<Property name="templetFilePath" label="模板文件的路径" value="config/vm/java/" />
+		<Property name="templetFile" label="模板文件" value="VService.vm" />
+		<Property name="packagePath" label="包路径" value="${pkg.service}.{0}" />
+		<Property name="entityPackage" label="实体包" value="${pkg.entity}.{0}.{1}${sfx.entity}" />
+	</Component>
+	<Component name="serviceImpl" type="ServiceImpl" label="生成serviceImpl">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.service}.{0}.impl" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.serviceImpl}.java" />
+		<Property name="templetFilePath" label="模板文件的路径" value="config/vm/java/" />
+		<Property name="templetFile" label="模板文件" value="VServiceImpl.vm" />
+		<Property name="packagePath" label="包路径" value="${pkg.service}.{0}.impl" />
+		<Property name="entityPackage" label="实体包" value="${pkg.entity}.{0}.{1}${sfx.entity}" />
+		<Property name="daoPackage" label="DAO包" value="${pkg.dao}.{0}.{1}${sfx.dao}" />
+		<Property name="implInterface" label="所实现的接口" value="${pkg.service}.{0}.{1}${sfx.service}" />
+	</Component>
+	<Component name="action" type="Action" label="生成Action">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.action}.{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.action}.java" />
+		<Property name="templetFilePath" label="模板文件的路径" value="config/vm/java/" />
+		<Property name="templetFile" label="模板文件" value="VAction-spring.vm" />
+		<Property name="packagePath" label="包路径" value="${pkg.action}.{0}" />
+		<Property name="entityPackage" label="实体包" value="${pkg.entity}.{0}.{1}${sfx.entity}" />
+		<Property name="servicePackage" label="Service包" value="${pkg.service}.{0}.{1}${sfx.service}" />
+	</Component>
+	<Component name="mybatis" type="Mybatis" label="生成mybatis">
+		<Property name="buildPath" label="生成xml文件的路径" value="${build.resources}/config/sqlmap/mysql/{0}/" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.mybatis}.xml" />
+		<Property name="templetFilePath" label="模板文件的路径" value="config/vm/sql/" />
+		<Property name="templetFile" label="模板路径" value="VMybatis.vm" />
+		<Property name="packagePath" label="DAO层包路径,0右边包,1表名" value="${pkg.dao}.{0}.{1}" />
+		<Property name="entityPackage" label="实体包,,0右边包,1表实体名" value="${pkg.entity}.{0}.{1}${sfx.entity}" />
+	</Component>
+	<Component name="mySqlTable" type="MySqlTable" label="生成Mysql表SQL">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.entity}/{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.entity}.sql" />
+		<Property name="templetFilePath" label="模板路径" value="config/vm/sql/" />
+		<Property name="templetFile" label="模板文件" value="VMySqlTable.vm" />
+	</Component>
+	<Component name="mySqlTableHs" type="MySqlTableHs" label="生成Mysql历史表SQL">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.entity}/{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.entity}.sql" />
+		<Property name="templetFilePath" label="模板路径" value="config/vm/sql/" />
+		<Property name="templetFile" label="模板文件" value="VMySqlTableHs.vm" />
+	</Component>
+	<Component name="mySqlField" type="MySqlField" label="生成Mysql表字段SQL">
+		<Property name="buildPath" label="生成java文件的路径" value="${build.java}/${pkg.entity}/{0}" />
+		<Property name="fileNameTempLet" label="生成文件名称模板,{0}根据表名自动生成,pm_user转PmUser" value="{0}${sfx.entity}.sql" />
+		<Property name="templetFilePath" label="模板路径" value="config/vm/sql/" />
+		<Property name="templetFile" label="模板文件" value="VMySqlField.vm" />
+	</Component>
+	
+</Config>

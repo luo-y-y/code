@@ -1,0 +1,151 @@
+#set($aliasName = $data.getEntityAliasName())
+#set($dao = ${sfx_dao})
+#set($map = "Map")
+#set($column = "$data.getDataName()_sql_col")
+#set($insertColumn = "$data.getDataName()_insert_sql_col")
+#set($selectColumn = "$data.getDataName()_select_sql_col")
+#set($comma = ",")
+#set($t = "t.")
+#set($w = "w.")
+#set($hs = "_hs")
+#set($count = $data.getFieldList().size())
+#set($table = $data.getDataName())
+#set($sqlType = $tableBean.getSqlType())
+#set($pkey = $tableBean.getPkey())
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="$data.getPackageName()$dao">
+   <resultMap type="$data.getEntityPackage()" id="$aliasName$map">
+#foreach($field in $data.getFieldList())
+#if($field.getIsPk() =="Y")
+	  <id property="$field.getName()" column="$field.getDataName()" />
+#else
+      <result property="$field.getName()" column="$field.getDataName()"/>
+#end
+#end
+   </resultMap>
+	
+   <sql id="$selectColumn">
+      #foreach($field in $data.getFieldList())#if($field.getTypeCd()=="R")${t}$field.getDataName()#else$field.getDefaultValue() AS $field.getDataName()#end#if($!{velocityCount} != $count)$comma #end#end
+
+   </sql>
+   
+   <sql id="$insertColumn">
+      #foreach($field in $data.getFieldList())#if($field.getTypeCd()=="R")$field.getDataName()#if($!{velocityCount} != $count)$comma #end#end#end
+
+   </sql>
+
+   <sql id="select_head_sql">
+      SELECT <include refid="$selectColumn" /> FROM $table t
+   </sql>
+
+   <sql id="select_count_sql">
+      SELECT count(${t}${pkey}) FROM $table t
+   </sql>
+#if($sqlType == "mysql")
+   <sql id="mysql_page_sql">
+      <if test="mysqlStart != null">
+      limit #{mysqlStart}, #{max}
+      </if>
+   </sql>
+#end
+#if($sqlType == "oracle")
+   <sql id="oracle_page_begin_sql">
+      <![CDATA[select * from (select a.*, ROWNUM rn from ( ]]>
+   </sql>
+   
+   <sql id="oracle_page_end_sql">
+      <![CDATA[) a where rownum <=#{oracleEnd} ) where rn>#{oracleStart}]]>
+   </sql>
+#end
+   <!--***********************define begin***********************-->
+#if($data.getDefPropertyContent() == "")
+   <sql id="list_where_sql">
+      where 1=1
+   </sql>
+   <sql id="page_where_sql">
+      where 1=1
+#if($tableBean.getValidUpdateDate() == "Y")
+      ORDER BY ${t}UPDATE_DATE DESC
+#end
+   </sql>
+   <sql id="count_where_sql">
+      where 1=1
+   </sql>
+   <sql id="loadcount_where_sql">
+      where 1=1
+   </sql>
+   <sql id="load_where_sql">
+      where 1=1
+      <if test="id != null">
+         AND ${t}${pkey} = #{$tableBean.getPkeyFirstLower()}
+      </if>
+   </sql>
+#else
+$data.getDefPropertyContent()
+#end
+   <!--***********************define end*************************-->
+   <insert id="save" parameterType="hashMap">
+      <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="${tableBean.getPkeyFirstLower()}">
+      <![CDATA[SELECT LAST_INSERT_ID() AS ${tableBean.getPkeyFirstLower()} ]]>
+      </selectKey>
+      INSERT INTO $table (<include refid="$insertColumn" />) 
+      VALUES(#foreach($field in $data.getFieldList())#if($field.getTypeCd()=="R")#{$field.getName()}#if($!{velocityCount} != $count),#end#end#end)
+   </insert>
+
+   <update id="update" parameterType="hashMap">
+      UPDATE $table SET #foreach($field in $data.getFieldList())#if($field.getIsPk()!="Y")#if($field.getTypeCd()=="R")$field.getDataName()=#{$field.getName()}#if($!{velocityCount} != $count),#end#end#end#end
+
+      WHERE ${pkey} = #{$tableBean.getPkeyFirstLower()}
+   </update>
+
+   <select id="load" resultMap="$aliasName$map" parameterType="hashMap">
+      <include refid="select_head_sql" />
+      <include refid="load_where_sql" />
+   </select>
+   
+   <select id="loadCount" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="loadcount_where_sql" />
+   </select>
+   
+   <select id="findList" resultMap="$aliasName$map" parameterType="hashMap">
+#if($sqlType == "oracle")
+      <include refid="oracle_page_begin_sql" />
+#end
+      <include refid="select_head_sql" /> 
+      <include refid="list_where_sql" />
+#if($sqlType == "mysql")
+      <include refid="mysql_page_sql" />
+#end
+#if($sqlType == "oracle")
+      <include refid="oracle_page_end_sql" />
+#end
+   </select>
+
+   <select id="findPageList" resultMap="$aliasName$map" parameterType="hashMap">
+#if($sqlType == "oracle")
+      <include refid="oracle_page_begin_sql" />
+#end
+      <include refid="select_head_sql" />
+      <include refid="page_where_sql" />
+#if($sqlType == "mysql")
+      <include refid="mysql_page_sql" />
+#end
+#if($sqlType == "oracle")
+      <include refid="oracle_page_end_sql" />
+#end
+   </select>
+  
+   <select id="findPageList_get_row_count" resultType="Integer">
+      <include refid="select_count_sql" />
+      <include refid="page_where_sql" />
+   </select>
+
+   <!--***********************method begin**********************-->
+$data.getDefMethodContent()
+   <!--***********************method end***********************-->
+
+
+</mapper>

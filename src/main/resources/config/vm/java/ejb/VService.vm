@@ -1,0 +1,111 @@
+#parse("common.vm")
+package $data.getPackageName();
+#set($name = $data.getClassName())
+#set($entityName = $data.getEntityName())
+#set($entityAliasName = $data.getEntityAliasName())
+/// ***********************import begin***********************
+#if($data.getDefImportContent() == "")
+import java.util.List;
+import java.util.Map;
+
+import com.tom.util.page.PageControlInfo;
+#foreach($import in $data.getImportList())
+import $import;
+#end
+#else
+$data.getDefImportContent()
+#end
+
+/// ***********************import end*************************
+public interface $name$sfxService{
+
+   /**
+    * 保存返回主键
+    * @param $entityAliasName 实体
+    * @return Long
+    */
+   Long save($entityName $entityAliasName);
+
+   /**
+    * 删除
+    * @param id 主键
+    * @return boolean(true:成功, false:失败)
+    */
+   boolean delete(Long id);
+
+   /**
+    * 删除多条数据
+    * @param idList	主键列表
+    * @return boolean(true:成功, false:失败)
+    */
+   boolean deleteByIds(String ids);
+
+   /**
+    * 修改
+    * @param $entityAliasName	实体
+    * @return boolean(true:成功, false:失败)
+    */
+   boolean update($entityName $entityAliasName);
+   
+   /**
+    * 根据主键获取实体
+    * @param id	主键
+    * @return $name
+    */
+   $entityName load(Long id);
+
+   /**
+    * 根据条件获取实体
+    * @param $entityAliasName   实体
+    * @return $name
+    */
+   $entityName load($entityName $entityAliasName);
+   
+   /**
+    * 根据条件获取数量
+    * @param $entityAliasName	实体
+    * @return Integer
+    */
+   public Integer loadCount($entityName $entityAliasName);
+
+   /**
+    * 根据条件检查是否存在
+    * @param $entityAliasName	实体
+    * @return boolean(true:存在; false:不存在)
+    */
+   boolean isExist($entityName $entityAliasName);
+
+   /**
+    * 根据条件获取实体列表,当skip、max均等于null获取全部)
+    * @param $entityAliasName	实体
+    * @param skip	当前页数
+    * @param max	页记录数
+    * @param params	其他参数
+    * @return List<$entityName>
+    */
+   List<$entityName> findList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params);
+   
+   /**
+    * 根据条件获取实体分页列表
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数(当等于null时,返回null)
+    * @param max	        页记录数(默认为20)
+    * @param params	        其他参数
+    * @return PageControlInfo
+    */
+   PageControlInfo findPageList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params);
+#if($isHistory == "Y")
+   /**
+    * 根据条件获取实体历史操作分页列表
+    * @param $entityAliasName	实体
+    * @param skip	        当前页数(当等于null时,返回null)
+    * @param max	        页记录数(默认为20)
+    * @param params	        其他参数
+    * @return PageControlInfo
+    */
+   PageControlInfo findPageHsList($entityName $entityAliasName, Integer skip, Integer max, Map<String, Object> params);
+#end
+   /// ***********************method begin***********************
+$data.getDefMethodContent()
+   /// ***********************method end*************************
+}
